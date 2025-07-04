@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+    Platform,
     SafeAreaView,
     ScrollView,
     StatusBar,
@@ -175,6 +176,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+        paddingTop: Platform.OS === 'android' ? 40 : 0
     },
     header: {
         flexDirection: 'row',

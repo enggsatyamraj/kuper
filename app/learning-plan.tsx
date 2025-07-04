@@ -3,13 +3,14 @@ import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Platform,
     SafeAreaView,
     ScrollView,
     StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { AIService } from '../services/aiService';
 import { HobbyType, LearningPlan, SkillLevel, User } from '../types';
@@ -266,6 +267,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8f9fa',
+        paddingTop: Platform.OS === 'android' ? 40 : 0
     },
     loadingContainer: {
         flex: 1,
