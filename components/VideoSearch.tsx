@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Alert, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { YouTubePlayer } from './YouTubePlayer';
 
 interface VideoSearchProps {
     techniqueTitle: string;
@@ -7,9 +8,14 @@ interface VideoSearchProps {
 }
 
 export const VideoSearch: React.FC<VideoSearchProps> = ({ techniqueTitle, hobby }) => {
+    const [showYouTubePlayer, setShowYouTubePlayer] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
-    const handleSearchVideos = async () => {
+    const handleSearchVideos = () => {
+        setShowYouTubePlayer(true);
+    };
+
+    const handleSearchExternal = async () => {
         try {
             setIsSearching(true);
 
@@ -18,7 +24,7 @@ export const VideoSearch: React.FC<VideoSearchProps> = ({ techniqueTitle, hobby 
             const encodedQuery = encodeURIComponent(searchQuery);
             const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodedQuery}`;
 
-            // Open YouTube search in browser
+            // Open YouTube search in external browser
             const canOpen = await Linking.canOpenURL(youtubeSearchUrl);
             if (canOpen) {
                 await Linking.openURL(youtubeSearchUrl);
@@ -39,11 +45,15 @@ export const VideoSearch: React.FC<VideoSearchProps> = ({ techniqueTitle, hobby 
             'Choose where to search for learning content:',
             [
                 {
-                    text: 'YouTube',
+                    text: 'In-App YouTube',
                     onPress: handleSearchVideos
                 },
                 {
-                    text: 'Google',
+                    text: 'External Browser',
+                    onPress: handleSearchExternal
+                },
+                {
+                    text: 'Google Search',
                     onPress: () => {
                         const searchQuery = `${hobby} ${techniqueTitle} tutorial guide`;
                         const encodedQuery = encodeURIComponent(searchQuery);
@@ -70,10 +80,9 @@ export const VideoSearch: React.FC<VideoSearchProps> = ({ techniqueTitle, hobby 
                 <TouchableOpacity
                     style={styles.primaryButton}
                     onPress={handleSearchVideos}
-                    disabled={isSearching}
                 >
                     <Text style={styles.primaryButtonText}>
-                        {isSearching ? 'Opening YouTube...' : '🎥 Search YouTube'}
+                        🎥 Watch Videos (In-App)
                     </Text>
                 </TouchableOpacity>
 
@@ -90,6 +99,14 @@ export const VideoSearch: React.FC<VideoSearchProps> = ({ techniqueTitle, hobby 
             <Text style={styles.tip}>
                 💡 Tip: Look for videos with good ratings and clear explanations
             </Text>
+
+            {/* YouTube Player Modal */}
+            <YouTubePlayer
+                techniqueTitle={techniqueTitle}
+                hobby={hobby}
+                visible={showYouTubePlayer}
+                onClose={() => setShowYouTubePlayer(false)}
+            />
         </View>
     );
 };
