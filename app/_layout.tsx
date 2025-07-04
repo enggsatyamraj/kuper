@@ -1,29 +1,59 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
+import React from 'react';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    return (
+        <>
+            <StatusBar style="dark" backgroundColor="#fff" />
+            <Stack
+                screenOptions={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
+                    gestureEnabled: true,
+                    gestureDirection: 'horizontal',
+                }}
+            >
+                <Stack.Screen
+                    name="index"
+                    options={{
+                        title: 'Home',
+                    }}
+                />
+                <Stack.Screen
+                    name="onboarding"
+                    options={{
+                        title: 'Get Started',
+                        gestureEnabled: false, // Prevent going back during onboarding
+                    }}
+                />
+                <Stack.Screen
+                    name="learning-plan"
+                    options={{
+                        title: 'Learning Plan',
+                    }}
+                />
+                <Stack.Screen
+                    name="techniques"
+                    options={{
+                        title: 'Techniques',
+                    }}
+                />
+                <Stack.Screen
+                    name="technique-detail"
+                    options={{
+                        title: 'Technique Detail',
+                        presentation: 'modal',
+                        animation: 'slide_from_bottom',
+                    }}
+                />
+                <Stack.Screen
+                    name="+not-found"
+                    options={{
+                        title: 'Not Found',
+                    }}
+                />
+            </Stack>
+        </>
+    );
 }
