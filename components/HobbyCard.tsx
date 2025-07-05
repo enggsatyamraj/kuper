@@ -1,11 +1,11 @@
+// components/HobbyCard.tsx
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { HobbyType } from '../types';
 
 interface HobbyCardProps {
-    hobby: HobbyType;
+    hobby: string; // Changed from HobbyType to string
     isSelected: boolean;
-    onPress: (hobby: HobbyType) => void;
+    onPress: (hobby: string) => void;
     icon: string;
     description: string;
 }

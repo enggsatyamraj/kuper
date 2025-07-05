@@ -1,3 +1,4 @@
+// app/technique-detail.tsx
 import { CompletionCelebration } from '@/components/CompletionCelebration';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -17,15 +18,11 @@ import { VideoSearch } from '../components/VideoSearch';
 import { LearningPlan, Technique } from '../types';
 import { StorageService } from '../utils/storage';
 
-
 export default function TechniqueDetailScreen() {
     const [learningPlan, setLearningPlan] = useState<LearningPlan | null>(null);
     const [technique, setTechnique] = useState<Technique | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [showNotes, setShowNotes] = useState(false);
-    const [notes, setNotes] = useState('');
     const [showCelebration, setShowCelebration] = useState(false);
-
 
     const router = useRouter();
     const { id } = useLocalSearchParams();
@@ -56,9 +53,6 @@ export default function TechniqueDetailScreen() {
 
             setLearningPlan(plan);
             setTechnique(foundTechnique);
-
-            // Load any saved notes (you could extend the Technique type to include notes)
-            setNotes(''); // For now, no persistent notes
 
         } catch (error) {
             console.error('Error loading technique data:', error);
@@ -97,7 +91,6 @@ export default function TechniqueDetailScreen() {
         const newCompleted = !technique.isCompleted;
 
         if (newCompleted) {
-            // Show celebration first
             setShowCelebration(true);
         }
 
@@ -107,7 +100,6 @@ export default function TechniqueDetailScreen() {
         });
 
         if (!newCompleted) {
-            // If uncompleting, just show simple feedback
             Alert.alert('✅ Marked as Incomplete', 'You can always come back to complete this technique later.');
         }
     };
@@ -136,7 +128,6 @@ export default function TechniqueDetailScreen() {
                 ]
             );
         } else {
-            // All techniques completed!
             Alert.alert(
                 '🎊 Course Complete!',
                 `Amazing! You've completed ALL techniques in your ${learningPlan!.hobby} learning plan! You're well on your way to mastery.`,
@@ -277,6 +268,14 @@ export default function TechniqueDetailScreen() {
                             <Text style={styles.timeIcon}>⏱️</Text>
                             <Text style={styles.timeText}>Estimated: {technique.estimatedTime}</Text>
                         </View>
+
+                        {technique.difficulty && (
+                            <View style={[styles.difficultyContainer, { backgroundColor: getDifficultyColor(technique.difficulty) + '20' }]}>
+                                <Text style={[styles.difficultyText, { color: getDifficultyColor(technique.difficulty) }]}>
+                                    {technique.difficulty}
+                                </Text>
+                            </View>
+                        )}
                     </View>
 
                     <Text style={[
@@ -286,11 +285,19 @@ export default function TechniqueDetailScreen() {
                     ]}>
                         {technique.description}
                     </Text>
+
+                    {technique.prerequisites && technique.prerequisites !== 'None' && (
+                        <View style={styles.prerequisitesContainer}>
+                            <Text style={styles.prerequisitesTitle}>📋 Prerequisites:</Text>
+                            <Text style={styles.prerequisitesText}>{technique.prerequisites}</Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Learning Resources */}
                 {!technique.isStrikedOut && (
                     <VideoSearch
+                        curatedVideos={technique.curatedVideos || []}
                         techniqueTitle={technique.title}
                         hobby={learningPlan.hobby}
                     />
@@ -299,12 +306,14 @@ export default function TechniqueDetailScreen() {
                 {/* Practice Tips */}
                 <View style={styles.tipsCard}>
                     <Text style={styles.tipsTitle}>💡 Practice Tips</Text>
+                    <Text style={styles.practiceHints}>
+                        {technique.practiceHints || 'Practice regularly and focus on proper form. Take breaks when you feel frustrated. Track your progress and celebrate small wins.'}
+                    </Text>
                     <View style={styles.tipsList}>
                         <Text style={styles.tipItem}>• Start slowly and focus on proper form</Text>
                         <Text style={styles.tipItem}>• Practice regularly in short sessions</Text>
                         <Text style={styles.tipItem}>• Don't rush - quality over quantity</Text>
                         <Text style={styles.tipItem}>• Take breaks when you feel frustrated</Text>
-                        <Text style={styles.tipItem}>• Track your progress and celebrate small wins</Text>
                     </View>
                 </View>
 
@@ -357,6 +366,7 @@ export default function TechniqueDetailScreen() {
 
                 <View style={styles.bottomPadding} />
             </ScrollView>
+
             <CompletionCelebration
                 visible={showCelebration}
                 onComplete={handleCelebrationComplete}
@@ -364,6 +374,14 @@ export default function TechniqueDetailScreen() {
         </SafeAreaView>
     );
 }
+
+const getDifficultyColor = (difficulty: string): string => {
+    switch (difficulty) {
+        case 'Easy': return '#4CAF50';
+        case 'Hard': return '#F44336';
+        default: return '#FF9800';
+    }
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -474,6 +492,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 16,
+        gap: 12,
     },
     timeContainer: {
         flexDirection: 'row',
@@ -492,16 +511,44 @@ const styles = StyleSheet.create({
         color: '#333',
         fontWeight: '500',
     },
+    difficultyContainer: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+    },
+    difficultyText: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
     description: {
         fontSize: 16,
         color: '#333',
         lineHeight: 24,
+        marginBottom: 16,
     },
     completedDescription: {
         color: '#4caf50',
     },
     strikedDescription: {
         color: '#999',
+    },
+    prerequisitesContainer: {
+        backgroundColor: '#f8f9fa',
+        padding: 16,
+        borderRadius: 12,
+        borderLeftWidth: 4,
+        borderLeftColor: '#2196f3',
+    },
+    prerequisitesTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 8,
+    },
+    prerequisitesText: {
+        fontSize: 14,
+        color: '#666',
+        lineHeight: 20,
     },
     tipsCard: {
         backgroundColor: '#fff',
@@ -518,7 +565,14 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         color: '#333',
+        marginBottom: 12,
+    },
+    practiceHints: {
+        fontSize: 14,
+        color: '#666',
+        lineHeight: 20,
         marginBottom: 16,
+        fontStyle: 'italic',
     },
     tipsList: {
         gap: 8,

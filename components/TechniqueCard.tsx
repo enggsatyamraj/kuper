@@ -1,3 +1,4 @@
+// components/TechniqueCard.tsx
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Technique } from '../types';
@@ -6,16 +7,12 @@ interface TechniqueCardProps {
     technique: Technique;
     index: number;
     onPress: () => void;
-    onToggleComplete: () => void;
-    onToggleStrike: () => void;
 }
 
 export const TechniqueCard: React.FC<TechniqueCardProps> = ({
     technique,
     index,
-    onPress,
-    onToggleComplete,
-    onToggleStrike
+    onPress
 }) => {
     const getCardStyle = () => {
         if (technique.isCompleted) {
@@ -33,10 +30,12 @@ export const TechniqueCard: React.FC<TechniqueCardProps> = ({
         return '⏳';
     };
 
-    const getStatusColor = () => {
-        if (technique.isCompleted) return '#4caf50';
-        if (technique.isStrikedOut) return '#999';
-        return '#2196f3';
+    const getDifficultyColor = () => {
+        switch (technique.difficulty) {
+            case 'Easy': return '#4CAF50';
+            case 'Hard': return '#F44336';
+            default: return '#FF9800';
+        }
     };
 
     return (
@@ -72,27 +71,19 @@ export const TechniqueCard: React.FC<TechniqueCardProps> = ({
                         <Text style={styles.timeIcon}>⏱️</Text>
                         <Text style={styles.timeText}>{technique.estimatedTime}</Text>
                     </View>
+
+                    {technique.difficulty && (
+                        <View style={[styles.difficultyContainer, { backgroundColor: getDifficultyColor() + '20' }]}>
+                            <Text style={[styles.difficultyText, { color: getDifficultyColor() }]}>
+                                {technique.difficulty}
+                            </Text>
+                        </View>
+                    )}
                 </View>
             </View>
 
-            <View style={styles.actionButtons}>
-                <TouchableOpacity
-                    style={[styles.actionButton, styles.completeButton]}
-                    onPress={onToggleComplete}
-                >
-                    <Text style={styles.completeButtonText}>
-                        {technique.isCompleted ? 'Undo' : 'Complete'}
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.actionButton, styles.strikeButton]}
-                    onPress={onToggleStrike}
-                >
-                    <Text style={styles.strikeButtonText}>
-                        {technique.isStrikedOut ? 'Restore' : 'Skip'}
-                    </Text>
-                </TouchableOpacity>
+            <View style={styles.tapHint}>
+                <Text style={styles.tapHintText}>Tap to view details →</Text>
             </View>
         </TouchableOpacity>
     );
@@ -146,7 +137,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     cardContent: {
-        marginBottom: 16,
+        marginBottom: 12,
     },
     title: {
         fontSize: 18,
@@ -176,6 +167,7 @@ const styles = StyleSheet.create({
     metaInfo: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: 12,
     },
     timeContainer: {
         flexDirection: 'row',
@@ -194,35 +186,24 @@ const styles = StyleSheet.create({
         color: '#333',
         fontWeight: '500',
     },
-    actionButtons: {
-        flexDirection: 'row',
-        gap: 12,
+    difficultyContainer: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
     },
-    actionButton: {
-        flex: 1,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 8,
+    difficultyText: {
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    tapHint: {
         alignItems: 'center',
+        paddingTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
     },
-    completeButton: {
-        backgroundColor: '#e8f5e8',
-        borderWidth: 1,
-        borderColor: '#4caf50',
-    },
-    strikeButton: {
-        backgroundColor: '#fff3e0',
-        borderWidth: 1,
-        borderColor: '#ff9800',
-    },
-    completeButtonText: {
-        color: '#4caf50',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    strikeButtonText: {
-        color: '#ff9800',
-        fontSize: 14,
-        fontWeight: '600',
+    tapHintText: {
+        fontSize: 12,
+        color: '#2196f3',
+        fontWeight: '500',
     },
 });

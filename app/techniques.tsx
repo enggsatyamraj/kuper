@@ -1,3 +1,4 @@
+// app/techniques.tsx
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -13,7 +14,7 @@ import {
     View,
 } from 'react-native';
 import { TechniqueCard } from '../components/TechniqueCard';
-import { LearningPlan, Technique } from '../types';
+import { LearningPlan } from '../types';
 import { StorageService } from '../utils/storage';
 
 export default function TechniquesScreen() {
@@ -47,47 +48,8 @@ export default function TechniquesScreen() {
         }
     };
 
-    const updateTechnique = async (techniqueId: string, updates: Partial<Technique>) => {
-        if (!learningPlan) return;
-
-        try {
-            const updatedTechniques = learningPlan.techniques.map(tech =>
-                tech.id === techniqueId ? { ...tech, ...updates } : tech
-            );
-
-            const updatedPlan = {
-                ...learningPlan,
-                techniques: updatedTechniques,
-                updatedAt: new Date().toISOString(),
-            };
-
-            await StorageService.saveLearningPlan(updatedPlan);
-            setLearningPlan(updatedPlan);
-        } catch (error) {
-            console.error('Error updating technique:', error);
-            Alert.alert('Error', 'Failed to update technique. Please try again.');
-        }
-    };
-
-    const handleTechniquePress = (technique: Technique) => {
-        // Navigate to technique detail (we'll create this next)
-        router.push(`/technique-detail?id=${technique.id}`);
-    };
-
-    const handleToggleComplete = (technique: Technique) => {
-        const newCompleted = !technique.isCompleted;
-        updateTechnique(technique.id, {
-            isCompleted: newCompleted,
-            isStrikedOut: newCompleted ? false : technique.isStrikedOut, // If completing, remove strike
-        });
-    };
-
-    const handleToggleStrike = (technique: Technique) => {
-        const newStriked = !technique.isStrikedOut;
-        updateTechnique(technique.id, {
-            isStrikedOut: newStriked,
-            isCompleted: newStriked ? false : technique.isCompleted, // If striking, remove completion
-        });
+    const handleTechniquePress = (techniqueId: string) => {
+        router.push(`/technique-detail?id=${techniqueId}`);
     };
 
     const getFilteredTechniques = () => {
@@ -203,9 +165,7 @@ export default function TechniquesScreen() {
                             key={technique.id}
                             technique={technique}
                             index={learningPlan.techniques.findIndex(t => t.id === technique.id)}
-                            onPress={() => handleTechniquePress(technique)}
-                            onToggleComplete={() => handleToggleComplete(technique)}
-                            onToggleStrike={() => handleToggleStrike(technique)}
+                            onPress={() => handleTechniquePress(technique.id)}
                         />
                     ))
                 )}

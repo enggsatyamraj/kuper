@@ -1,3 +1,4 @@
+// app/onboarding.tsx
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -7,27 +8,28 @@ import {
     StatusBar,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
 import { HobbyCard } from '../components/HobbyCard';
 import { SkillLevelCard } from '../components/SkillLevelCard';
-import { HobbyType, SkillLevel } from '../types';
+import { SkillLevel } from '../types';
 import { StorageService } from '../utils/storage';
 
-const HOBBIES = [
+const POPULAR_HOBBIES = [
     {
-        type: 'Chess' as HobbyType,
+        type: 'Chess',
         icon: '♟️',
         description: 'Master strategic thinking and tactical patterns'
     },
     {
-        type: 'Poker' as HobbyType,
+        type: 'Poker',
         icon: '🃏',
         description: 'Learn probability, psychology and game theory'
     },
     {
-        type: 'Guitar' as HobbyType,
+        type: 'Guitar',
         icon: '🎸',
         description: 'Play chords, scales and your favorite songs'
     }
@@ -49,14 +51,32 @@ const SKILL_LEVELS = [
 ];
 
 export default function OnboardingScreen() {
-    const [selectedHobby, setSelectedHobby] = useState<HobbyType | null>(null);
+    const [selectedHobby, setSelectedHobby] = useState<string | null>(null);
+    const [customHobby, setCustomHobby] = useState<string>('');
     const [selectedLevel, setSelectedLevel] = useState<SkillLevel | null>(null);
     const [currentStep, setCurrentStep] = useState<'hobby' | 'level'>('hobby');
     const [isLoading, setIsLoading] = useState(false);
+    const [showCustomInput, setShowCustomInput] = useState(false);
     const router = useRouter();
 
-    const handleHobbySelect = (hobby: HobbyType) => {
+    const handleHobbySelect = (hobby: string) => {
         setSelectedHobby(hobby);
+        setCustomHobby('');
+        setShowCustomInput(false);
+    };
+
+    const handleCustomHobbySelect = () => {
+        setShowCustomInput(true);
+        setSelectedHobby(null);
+    };
+
+    const handleCustomHobbyChange = (text: string) => {
+        setCustomHobby(text);
+        if (text.trim()) {
+            setSelectedHobby(text.trim());
+        } else {
+            setSelectedHobby(null);
+        }
     };
 
     const handleLevelSelect = (level: SkillLevel) => {
@@ -119,11 +139,11 @@ export default function OnboardingScreen() {
                     <View style={styles.section}>
                         <Text style={styles.title}>What would you like to learn?</Text>
                         <Text style={styles.subtitle}>
-                            Choose a hobby you want to master efficiently
+                            Choose a popular hobby or enter your own
                         </Text>
 
                         <View style={styles.cardsContainer}>
-                            {HOBBIES.map((hobby) => (
+                            {POPULAR_HOBBIES.map((hobby) => (
                                 <HobbyCard
                                     key={hobby.type}
                                     hobby={hobby.type}
@@ -133,6 +153,38 @@ export default function OnboardingScreen() {
                                     onPress={handleHobbySelect}
                                 />
                             ))}
+
+                            {/* Custom Hobby Option */}
+                            <TouchableOpacity
+                                style={[styles.customCard, showCustomInput && styles.selectedCard]}
+                                onPress={handleCustomHobbySelect}
+                                activeOpacity={0.7}
+                            >
+                                <View style={styles.cardContent}>
+                                    <Text style={styles.customIcon}>✨</Text>
+                                    <Text style={[styles.customTitle, showCustomInput && styles.selectedTitle]}>
+                                        Other Hobby
+                                    </Text>
+                                    <Text style={[styles.customDescription, showCustomInput && styles.selectedDescription]}>
+                                        Type any hobby you want to learn
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            {/* Custom Input Field */}
+                            {showCustomInput && (
+                                <View style={styles.customInputContainer}>
+                                    <TextInput
+                                        style={styles.customInput}
+                                        placeholder="Enter your hobby (e.g., Piano, Photography, Cooking)"
+                                        value={customHobby}
+                                        onChangeText={handleCustomHobbyChange}
+                                        autoFocus={true}
+                                        returnKeyType="done"
+                                        placeholderTextColor="#999"
+                                    />
+                                </View>
+                            )}
                         </View>
                     </View>
                 ) : (
@@ -230,6 +282,56 @@ const styles = StyleSheet.create({
     },
     cardsContainer: {
         paddingBottom: 20,
+    },
+    customCard: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 16,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    selectedCard: {
+        backgroundColor: '#e3f2fd',
+        borderColor: '#2196f3',
+    },
+    cardContent: {
+        alignItems: 'center',
+    },
+    customIcon: {
+        fontSize: 32,
+        marginBottom: 8,
+    },
+    customTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 4,
+    },
+    selectedTitle: {
+        color: '#1976d2',
+    },
+    customDescription: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 20,
+    },
+    selectedDescription: {
+        color: '#1976d2',
+    },
+    customInputContainer: {
+        marginTop: 8,
+        marginBottom: 16,
+    },
+    customInput: {
+        backgroundColor: '#fff',
+        borderWidth: 2,
+        borderColor: '#2196f3',
+        borderRadius: 12,
+        padding: 16,
+        fontSize: 16,
+        color: '#333',
     },
     footer: {
         padding: 20,
