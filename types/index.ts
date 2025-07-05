@@ -1,19 +1,4 @@
 // types/index.ts
-export interface Technique {
-    id: string;
-    title: string;
-    description: string;
-    isCompleted: boolean;
-    isStrikedOut: boolean;
-    videoUrl?: string;
-    estimatedTime?: string;
-    difficulty?: 'Easy' | 'Medium' | 'Hard';
-    priority?: 'High' | 'Medium' | 'Low';
-    prerequisites?: string;
-    practiceHints?: string;
-    // Pre-curated video data
-    curatedVideos?: CuratedVideo[];
-}
 
 export interface CuratedVideo {
     id: string;
@@ -41,6 +26,39 @@ export interface User {
     selectedHobby?: string; // Changed from HobbyType to string
     selectedLevel?: string;
     currentPlan?: LearningPlan;
+}
+
+export interface LearningResource {
+    id: string;
+    type: 'video' | 'article' | 'tutorial' | 'tool' | 'course';
+    title: string;
+    url: string;
+    description: string;
+    source: string;
+    duration?: string;
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+    isRecommended?: boolean;
+    thumbnailUrl?: string;
+    author?: string;
+    rating?: number;
+}
+
+// Update your existing Technique interface to include:
+export interface Technique {
+    id: string;
+    title: string;
+    description: string;
+    isCompleted: boolean;
+    isStrikedOut: boolean;
+    videoUrl?: string;
+    estimatedTime?: string;
+    difficulty?: 'Easy' | 'Medium' | 'Hard';
+    priority?: 'High' | 'Medium' | 'Low';
+    prerequisites?: string;
+    practiceHints?: string;
+    // Enhanced learning resources
+    curatedVideos?: CuratedVideo[];
+    learningResources?: LearningResource[]; // NEW: Articles, tools, courses
 }
 
 // Keep these for backwards compatibility and popular hobbies

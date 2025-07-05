@@ -14,9 +14,11 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { LearningResourcesSection } from '../components/LearningResourcesSection';
 import { VideoSearch } from '../components/VideoSearch';
 import { LearningPlan, Technique } from '../types';
 import { StorageService } from '../utils/storage';
+
 
 export default function TechniqueDetailScreen() {
     const [learningPlan, setLearningPlan] = useState<LearningPlan | null>(null);
@@ -294,7 +296,15 @@ export default function TechniqueDetailScreen() {
                     )}
                 </View>
 
-                {/* Learning Resources */}
+                {/* Learning Resources Section - NEW */}
+                {!technique.isStrikedOut && (
+                    <LearningResourcesSection
+                        resources={technique.learningResources || []}
+                        techniqueTitle={technique.title}
+                    />
+                )}
+
+                {/* Video Resources - Keep existing VideoSearch component */}
                 {!technique.isStrikedOut && (
                     <VideoSearch
                         curatedVideos={technique.curatedVideos || []}
