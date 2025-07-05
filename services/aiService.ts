@@ -620,34 +620,39 @@ Generate the optimized ${level} ${hobby} learning plan now:`;
         hobby: string,
         level: SkillLevel
     ): Promise<CuratedVideo[]> {
-        // Keep existing implementation - not changing videos for now
-        const curatedVideos: CuratedVideo[] = [];
+        try {
+            // Import YouTube service
+            const { YouTubeService } = await import('./youtubeService');
 
-        const educationalVideos = [
-            { id: 'yQhQBi5XgyM', title: 'Complete Beginner Guide', channel: 'FreeCodeCamp', duration: '12:34' },
-            { id: 'W6NZfCO5SIk', title: 'JavaScript Tutorial', channel: 'Programming with Mosh', duration: '15:45' },
-            { id: 'hdI2bqOjy3c', title: 'Learn the Basics', channel: 'Traversy Media', duration: '8:20' }
-        ];
+            const curatedVideos: CuratedVideo[] = [];
 
-        for (let i = 0; i < Math.min(searchTerms.length, 2); i++) {
-            const searchTerm = searchTerms[i];
-            const video = educationalVideos[i % educationalVideos.length];
+            // Search for videos using the first search term
+            const searchQuery = `${hobby} ${searchTerms[0]} ${level} tutorial`;
+            const youtubeVideos = await YouTubeService.searchVideos(searchQuery, 5);
 
-            curatedVideos.push({
-                id: Math.random().toString(36).substr(2, 9),
-                title: `${searchTerm} - ${level} Tutorial`,
-                url: `https://www.youtube.com/watch?v=${video.id}`,
-                thumbnailUrl: `https://img.youtube.com/vi/${video.id}/mqdefault.jpg`,
-                duration: video.duration,
-                channelName: video.channel,
-                description: `Master ${searchTerm} in ${hobby} with this comprehensive ${level.toLowerCase()} tutorial.`,
-                quality: level,
-                isRecommended: i === 0,
-                videoId: video.id
+            // Convert YouTube videos to CuratedVideo format
+            youtubeVideos.forEach((video, index) => {
+                curatedVideos.push({
+                    id: this.generateTechniqueId(),
+                    title: video.title,
+                    url: `https://www.youtube.com/watch?v=${video.id}`,
+                    thumbnailUrl: video.thumbnailUrl,
+                    duration: video.duration,
+                    channelName: video.channelName,
+                    description: video.description.substring(0, 150) + '...',
+                    quality: level,
+                    isRecommended: index === 0,
+                    videoId: video.id
+                });
             });
-        }
 
-        return curatedVideos;
+            console.log(`✅ Generated ${curatedVideos.length} real YouTube videos`);
+            return curatedVideos;
+
+        } catch (error) {
+            console.error('❌ Error generating YouTube videos:', error);
+            return this.getFallbackVideos(searchTerms[0], hobby, level);
+        }
     }
 
     /**
