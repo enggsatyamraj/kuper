@@ -1,3 +1,4 @@
+import { CompletionCelebration } from '@/components/CompletionCelebration';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -16,12 +17,15 @@ import { VideoSearch } from '../components/VideoSearch';
 import { LearningPlan, Technique } from '../types';
 import { StorageService } from '../utils/storage';
 
+
 export default function TechniqueDetailScreen() {
     const [learningPlan, setLearningPlan] = useState<LearningPlan | null>(null);
     const [technique, setTechnique] = useState<Technique | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [showNotes, setShowNotes] = useState(false);
     const [notes, setNotes] = useState('');
+    const [showCelebration, setShowCelebration] = useState(false);
+
 
     const router = useRouter();
     const { id } = useLocalSearchParams();
@@ -91,16 +95,62 @@ export default function TechniqueDetailScreen() {
         if (!technique) return;
 
         const newCompleted = !technique.isCompleted;
+
+        if (newCompleted) {
+            // Show celebration first
+            setShowCelebration(true);
+        }
+
         updateTechnique({
             isCompleted: newCompleted,
             isStrikedOut: newCompleted ? false : technique.isStrikedOut,
         });
 
-        if (newCompleted) {
-            Alert.alert('🎉 Congratulations!', 'You completed this technique!', [
-                { text: 'Continue Learning', style: 'default' },
-                { text: 'Back to List', onPress: () => router.back() }
-            ]);
+        if (!newCompleted) {
+            // If uncompleting, just show simple feedback
+            Alert.alert('✅ Marked as Incomplete', 'You can always come back to complete this technique later.');
+        }
+    };
+
+    const handleCelebrationComplete = () => {
+        setShowCelebration(false);
+
+        const nextTech = getNextTechnique();
+        const completedCount = learningPlan!.techniques.filter(t => t.isCompleted).length;
+        const totalCount = learningPlan!.techniques.length;
+        const progressPercentage = Math.round((completedCount / totalCount) * 100);
+
+        if (nextTech) {
+            Alert.alert(
+                'What\'s Next?',
+                `You've completed ${completedCount} of ${totalCount} techniques (${progressPercentage}%).\n\nReady for the next challenge?`,
+                [
+                    {
+                        text: 'Next Technique',
+                        onPress: () => router.replace(`/technique-detail?id=${nextTech.id}`)
+                    },
+                    {
+                        text: 'Back to List',
+                        onPress: () => router.back()
+                    }
+                ]
+            );
+        } else {
+            // All techniques completed!
+            Alert.alert(
+                '🎊 Course Complete!',
+                `Amazing! You've completed ALL techniques in your ${learningPlan!.hobby} learning plan! You're well on your way to mastery.`,
+                [
+                    {
+                        text: 'View Progress',
+                        onPress: () => router.navigate('/learning-plan')
+                    },
+                    {
+                        text: 'Start New Journey',
+                        onPress: () => router.navigate('/onboarding')
+                    }
+                ]
+            );
         }
     };
 
@@ -307,6 +357,10 @@ export default function TechniqueDetailScreen() {
 
                 <View style={styles.bottomPadding} />
             </ScrollView>
+            <CompletionCelebration
+                visible={showCelebration}
+                onComplete={handleCelebrationComplete}
+            />
         </SafeAreaView>
     );
 }

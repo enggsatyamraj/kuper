@@ -267,7 +267,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8f9fa',
-        paddingTop: Platform.OS === 'android' ? 40 : 0
+        paddingTop: Platform.OS === 'android' ? 40 : 0,
+        // paddingBottom: Platform.OS === 'android' ? 40 : 0
     },
     loadingContainer: {
         flex: 1,
@@ -526,6 +527,7 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         borderRadius: 12,
         minWidth: 200,
+        marginBottom: 20
     },
     startButtonText: {
         color: '#fff',
